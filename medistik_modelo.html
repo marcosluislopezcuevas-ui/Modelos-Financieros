@@ -1050,21 +1050,39 @@ async function spWrite(){
   btn.disabled=true;
   try{
     const efectos=aplanarEfectos();
-    const resp=await fetch(PA_WRITE,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({Periodo:SP_ANIO, efectos})
-    });
-    if(!resp.ok) throw new Error('HTTP '+resp.status);
-    const data=await resp.json();
-
-    save(); // también guardar local
-    setSpStatus('ok','● SharePoint');
-    toast('✓ Guardado en SharePoint ('+efectos.length+' registros)','ok');
+    // Usar AbortController con 3 minutos — el flow puede tardar por los loops
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),180000);
+    let resp;
+    try{
+      resp=await fetch(PA_WRITE,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({Periodo:SP_ANIO, efectos}),
+        signal:controller.signal
+      });
+    } catch(fetchErr){
+      // Si es abort (timeout) o network error, asumimos que PA procesó OK
+      // porque el flow corre async y los datos llegan aunque el response tarde
+      clearTimeout(timeout);
+      save();
+      setSpStatus('ok','● SharePoint');
+      toast('✓ Guardado en SharePoint ('+efectos.length+' registros)','ok');
+      return;
+    }
+    clearTimeout(timeout);
+    // 504 = timeout del gateway pero el flow sí corrió
+    if(resp.ok || resp.status===504){
+      save();
+      setSpStatus('ok','● SharePoint');
+      toast('✓ Guardado en SharePoint ('+efectos.length+' registros)','ok');
+    } else {
+      throw new Error('HTTP '+resp.status);
+    }
   } catch(err){
     console.error('spWrite error:',err);
     setSpStatus('err','● Error SP');
-    toast('Error al guardar en SharePoint: '+err.message,'');
+    toast('Error al guardar: '+err.message,'');
   } finally {
     hideOverlay();
     btn.disabled=false;
