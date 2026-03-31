@@ -20,14 +20,9 @@
   --fh:'Barlow Condensed',sans-serif; --fb:'Barlow',sans-serif;
   --r:8px; --rl:14px;
 }
-.gc-0{--gc:#2563EB;--gc-bg:#EFF6FF;--gc-bd:#93C5FD;}
-.gc-1{--gc:#16A34A;--gc-bg:#F0FDF4;--gc-bd:#86EFAC;}
-.gc-2{--gc:#DC2626;--gc-bg:#FEF2F2;--gc-bd:#FCA5A5;}
-.gc-3{--gc:#D97706;--gc-bg:#FFFBEB;--gc-bd:#FCD34D;}
-.gc-4{--gc:#7C3AED;--gc-bg:#F5F3FF;--gc-bd:#C4B5FD;}
-.gc-5{--gc:#0891B2;--gc-bg:#ECFEFF;--gc-bd:#67E8F9;}
-.gc-6{--gc:#BE185D;--gc-bg:#FDF2F8;--gc-bd:#F9A8D4;}
-.gc-7{--gc:#65A30D;--gc-bg:#F7FEE7;--gc-bd:#BEF264;}
+.gc-pos{--gc:var(--pos);--gc-bg:var(--pos-bg);--gc-bd:#86EFAC;}
+.gc-neg{--gc:var(--neg);--gc-bg:var(--neg-bg);--gc-bd:#FCA5A5;}
+.gc-neu{--gc:var(--gray-m);--gc-bg:var(--surface2);--gc-bd:var(--border-m);}
 
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--white);color:var(--gray);font-family:var(--fb);font-size:16px;min-height:100vh;}
@@ -333,8 +328,6 @@ body{background:var(--white);color:var(--gray);font-family:var(--fb);font-size:1
     <div class="modal-body">
       <div class="fl"><span class="lbl">Nombre del grupo</span>
         <input class="inp" id="mg-nom" type="text" placeholder="Ej: Cliente Nuevo Farma, Salida RedPack…"></div>
-      <div class="fl"><span class="lbl">Color</span>
-        <div class="cp" id="cp"></div></div>
     </div>
     <div class="modal-foot">
       <button class="btn-ghost" onclick="closeGrpModal()">Cancelar</button>
@@ -404,10 +397,7 @@ const HINTS  = {
   costos_fijos: '💡 Positivo = sube costo fijo → reduce EBITDA. Negativo = ahorras → mejora.',
   gastos_grales:'💡 Positivo = sube gastos generales → reduce EBITDA. Negativo = ahorras → mejora.'
 };
-const COLORS = [
-  {id:0,hex:'#2563EB'},{id:1,hex:'#16A34A'},{id:2,hex:'#DC2626'},{id:3,hex:'#D97706'},
-  {id:4,hex:'#7C3AED'},{id:5,hex:'#0891B2'},{id:6,hex:'#BE185D'},{id:7,hex:'#65A30D'}
-];
+const COLORS = [];  // ya no se usa, colores son por impacto
 
 // ── PRESUPUESTO BASE 2026 — MEDISTIK (datos del Excel) ────────
 const BASE = {
@@ -427,7 +417,7 @@ let groups = [];
 let vista  = 'c';
 let _seq   = 1;
 function uid(){ return 'i'+(_seq++)+Math.random().toString(36).slice(2,5); }
-let editGrpId=null, editEffId=null, effGrpId=null, selColor=0;
+let editGrpId=null, editEffId=null, effGrpId=null;
 
 // ── CÁLCULO ───────────────────────────────────────────────────
 function sum(a){ return a.reduce((s,v)=>s+v,0); }
@@ -498,8 +488,8 @@ function renderGroups(){
   }
   let h='';
   groups.forEach(g=>{
-    const gcc='gc-'+(g.colorId%8);
     const imp=grpImpact(g);
+    const gcc=imp>0?'gc-pos':imp<0?'gc-neg':'gc-neu';
     const onGrp=g.on&&g.effects.some(e=>e.on);
     const impC=imp>0?'vp':imp<0?'vn':'';
     const impTx=onGrp&&Math.abs(imp)>0?`<div class="grp-impact ${impC}">${imp>0?'+':''}${fmtM(imp)}</div>`:'';
@@ -592,8 +582,8 @@ function renderKPIs(){
       <div class="kpi-sub">${pctS(nEb,bEb)} vs presupuesto</div></div>`;
   }
   groups.filter(g=>g.on&&g.effects.some(e=>e.on)).forEach(g=>{
-    const gcc='gc-'+(g.colorId%8);
     const imp=grpImpact(g);
+    const gcc=imp>0?'gc-pos':imp<0?'gc-neg':'gc-neu';
     h+=`<div class="kpi hl-grp ${gcc}"><div class="kpi-lbl">${esc(g.nombre)}</div>
       <div class="kpi-val grp">${sgnM(imp)}</div>
       <div class="kpi-sub">en EBITDA</div></div>`;
@@ -756,17 +746,11 @@ function delGrp(id){if(!confirm('¿Eliminar este grupo y todos sus efectos?')) r
 function togEff(gid,eid){const g=groups.find(x=>x.id===gid); if(!g) return; const e=g.effects.find(x=>x.id===eid); if(e){e.on=!e.on; save(); recalcular();}}
 function delEff(gid,eid){const g=groups.find(x=>x.id===gid); if(!g) return; g.effects=g.effects.filter(x=>x.id!==eid); save(); recalcular(); toast('Efecto eliminado','');}
 
-function nextColor(){const used=new Set(groups.map(g=>g.colorId)); for(let i=0;i<8;i++){if(!used.has(i)) return i;} return groups.length%8;}
-function renderCP(){document.getElementById('cp').innerHTML=COLORS.map(c=>`<div class="cp-sw ${selColor===c.id?'sel':''}" style="background:${c.hex}" onclick="pickColor(${c.id})"></div>`).join('');}
-function pickColor(id){selColor=id; renderCP();}
-
 function openGrpModal(id){
   editGrpId=id||null;
   const g=id?groups.find(x=>x.id===id):null;
   document.getElementById('mg-ttl').textContent=g?'Renombrar Grupo':'Nuevo Grupo';
   document.getElementById('mg-nom').value=g?g.nombre:'';
-  selColor=g?g.colorId:nextColor();
-  renderCP();
   document.getElementById('mg').classList.add('open');
   setTimeout(()=>document.getElementById('mg-nom').focus(),80);
 }
@@ -774,8 +758,8 @@ function closeGrpModal(){document.getElementById('mg').classList.remove('open');
 function saveGrp(){
   const nom=document.getElementById('mg-nom').value.trim();
   if(!nom){toast('Ponle nombre al grupo','warn'); return;}
-  if(editGrpId){const g=groups.find(x=>x.id===editGrpId); if(g){g.nombre=nom;g.colorId=selColor;} toast('Grupo actualizado','ok');}
-  else{groups.push({id:uid(),nombre:nom,colorId:selColor,on:true,exp:true,effects:[]}); toast('Grupo creado ✓','ok');}
+  if(editGrpId){const g=groups.find(x=>x.id===editGrpId); if(g){g.nombre=nom;} toast('Grupo actualizado','ok');}
+  else{groups.push({id:uid(),nombre:nom,on:true,exp:true,effects:[]}); toast('Grupo creado ✓','ok');}
   closeGrpModal(); save(); recalcular();
 }
 
@@ -978,11 +962,16 @@ function reconstruirGrupos(filas){
       grpMap[nombreGrp]={
         id:      uid(),
         nombre:  nombreGrp,
-        colorId: color,
+        colorId: parseInt(f['color'])||0,
         on:      true,
         exp:     false,
         effects: {}
       };
+    } else {
+      // Actualizar colorId si llega válido en cualquier fila del grupo
+      if(f['color']!==undefined && f['color']!==null && f['color']!==''){
+        grpMap[nombreGrp].colorId=parseInt(f['color'])||0;
+      }
     }
 
     const grp=grpMap[nombreGrp];
