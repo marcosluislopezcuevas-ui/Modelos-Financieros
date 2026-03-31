@@ -962,7 +962,7 @@ function reconstruirGrupos(filas){
   const grpMap={};  // clave: nombre grupo
 
   filas.forEach(f=>{
-    const nombreGrp = f['Nombre_de_Grupo'] || f['Nombre de Grupo'] || '';
+    const nombreGrp = f['NombredeGrupo'] || f['Nombre_de_Grupo'] || f['Nombre de Grupo'] || '';
     const effId     = (f['Title']||'').split('_').slice(0,-2).join('_') || f['Title'];
     const mesStr    = f['Periodo']||'';           // ej: 2026_04
     const mesIdx    = parseInt((mesStr.split('_')[1]||'1'))-1;  // 0-based
