@@ -162,25 +162,28 @@ body{background:var(--white);color:var(--gray);font-family:var(--fb);font-size:1
 .r-dat td:first-child{padding-left:20px;}
 .r-sub td{background:var(--surface2);font-weight:700;border-top:2px solid var(--border-m);border-bottom:2px solid var(--border-m);}
 .r-sub td:first-child{font-family:var(--fh);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.04em;}
-/* % row — subtle, italic */
-.r-pct td{background:var(--lime-bg);border-bottom:1px solid var(--lime-pale);}
+/* Contribución Marginal — lime igual que pl_med */
+.r-pct td{background:var(--lime-pale);border-bottom:1px solid var(--lime-dark);}
 .r-pct td:first-child{font-family:var(--fh);font-weight:700;font-size:11px;color:var(--lime-deep);padding-left:20px;font-style:italic;letter-spacing:.03em;}
 .r-pct td{font-size:12px;color:var(--lime-deep);font-style:italic;font-weight:600;}
-/* EBITDA rows */
-.r-eb td{background:#1A3550;color:var(--white);font-weight:700;border-top:2px solid var(--blue);}
-.r-eb td:first-child{font-family:var(--fh);font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--lime);}
-.r-eb-pct td{background:#122436;color:rgba(208,223,0,.7);border-bottom:1px solid #0F2035;}
+/* Subtotal Contrib Marginal */
+.r-cm td{background:var(--lime-pale);border-top:2px solid var(--lime-dark);border-bottom:2px solid var(--lime-dark);font-weight:700;}
+.r-cm td:first-child{font-family:var(--fh);font-weight:800;font-size:16px;color:var(--lime-deep);text-transform:uppercase;letter-spacing:.04em;}
+/* EBITDA — azul oscuro igual que pl_med */
+.r-eb td{background:#1A3550;color:var(--white);font-weight:700;border-top:2px solid #0F2035;}
+.r-eb td:first-child{font-family:var(--fh);font-weight:800;font-size:16px;color:var(--lime);text-transform:uppercase;letter-spacing:.06em;}
+.r-eb-pct td{background:#122436;color:rgba(208,223,0,.75);border-bottom:1px solid #0F2035;}
 .r-eb-pct td:first-child{font-family:var(--fh);font-weight:700;font-size:11px;padding-left:20px;font-style:italic;letter-spacing:.03em;}
 .r-eb-pct td{font-size:12px;font-style:italic;font-weight:600;}
-/* EBITDA Operativo */
-.r-ebop td{background:#0D2235;color:var(--white);font-weight:700;border-top:2px solid #0A1B2A;}
-.r-ebop td:first-child{font-family:var(--fh);font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--lime-light);}
-.r-ebop-pct td{background:#091929;color:rgba(227,233,53,.65);border-bottom:1px solid #091929;}
-.r-ebop-pct td:first-child{font-family:var(--fh);font-weight:700;font-size:11px;padding-left:20px;font-style:italic;letter-spacing:.03em;}
-.r-ebop-pct td{font-size:12px;font-style:italic;font-weight:600;}
-/* otros */
+/* Otros ingresos/gastos */
 .r-otros td{background:var(--real-bg);color:var(--gray);}
 .r-otros td:first-child{font-family:var(--fh);font-weight:700;font-size:13px;color:var(--real);}
+/* EBITDA Operativo — más oscuro que EBITDA */
+.r-ebop td{background:#0D2235;color:var(--white);font-weight:700;border-top:2px solid #0A1B2A;}
+.r-ebop td:first-child{font-family:var(--fh);font-weight:800;font-size:16px;color:var(--lime-light);text-transform:uppercase;letter-spacing:.06em;}
+.r-ebop-pct td{background:#091929;color:rgba(227,233,53,.7);border-bottom:1px solid #091929;}
+.r-ebop-pct td:first-child{font-family:var(--fh);font-weight:700;font-size:11px;padding-left:20px;font-style:italic;letter-spacing:.03em;}
+.r-ebop-pct td{font-size:12px;font-style:italic;font-weight:600;}
 
 .cadj{background:rgba(123,63,196,.04);}
 .cnew{background:rgba(42,138,26,.04);}
@@ -596,7 +599,7 @@ function renderKPIs(){
 const ROWS=[
   {t:'h',  lbl:'Ingresos'},
   {t:'d',  lbl:'Ingresos Netos',        rk:'ingresos',    ak:'ingresos'},
-  {t:'s',  lbl:'Contribución Marginal', rk:'cm',          bk:'cm'},
+  {t:'cm', lbl:'Contribución Marginal', rk:'cm', bk:'cm'},
   {t:'pct',lbl:'% sobre ventas',        ref:'cm'},
   {t:'h',  lbl:'Costos'},
   {t:'d',  lbl:'Costos Variables',      rk:'costos_var',  ak:'costos_var',    neg:true},
@@ -695,7 +698,7 @@ function renderTable(){
     }
 
     // ── DATA / SUBTOTAL / EBITDA / EBITDA_OP ROWS
-    const rcMap={d:'r-dat',s:'r-sub',eb:'r-eb',ebop:'r-ebop'};
+    const rcMap={d:'r-dat',s:'r-sub',cm:'r-cm',eb:'r-eb',ebop:'r-ebop'};
     const rc=rcMap[row.t]||'r-dat';
     h+=`<tr class="${rc}"><td>${row.lbl}</td>`;
     let tB=0,tA=0,tN=0;
@@ -708,28 +711,28 @@ function renderTable(){
 
       if(hasAny){
         if(showBase){
-          const bc=(row.t==='eb'||row.t==='ebop')?'vll':'vz';
+          const bc=(row.t==='eb'||row.t==='ebop'||row.t==='cm')?'vll':'vz';
           h+=`<td class="${bc}">${fmt(bv)}</td>`;
         }
         let ac='vz';
         if(Math.abs(av)>=1) ac=(row.neg?av<0:av>0)?'vp':'vn';
         h+=`<td class="cadj ${ac}">${Math.abs(av)<1?'—':sgn(av)}</td>`;
-        let nc=''; if(row.t==='eb'||row.t==='ebop') nc=nv>=0?'vll':'vn'; if(row.t==='s') nc=nv>=0?'vl':'vn';
+        let nc=''; if(row.t==='eb'||row.t==='ebop') nc=nv>=0?'vll':'vn'; if(row.t==='cm') nc=nv>=0?'vl':'vn';
         h+=`<td class="cnew ${nc}">${fmt(nv)}</td>`;
       } else {
-        let vc=''; if(row.t==='eb'||row.t==='ebop') vc=nv>=0?'vll':'vn'; if(row.t==='s') vc=nv>=0?'vl':'vn';
+        let vc=''; if(row.t==='eb'||row.t==='ebop') vc=nv>=0?'vll':'vn'; if(row.t==='cm') vc=nv>=0?'vl':'vn';
         h+=`<td class="${vc}">${fmt(nv)}</td>`;
       }
     }
 
     if(hasAny){
-      if(showBase){const bc=(row.t==='eb'||row.t==='ebop')?'vll':'vz';h+=`<td class="ctot ${bc}">${fmt(tB)}</td>`;}
+      if(showBase){const bc=(row.t==='eb'||row.t==='ebop'||row.t==='cm')?'vll':'vz';h+=`<td class="ctot ${bc}">${fmt(tB)}</td>`;}
       let ac='vz'; if(Math.abs(tA)>=1) ac=(row.neg?tA<0:tA>0)?'vp':'vn';
       h+=`<td class="ctot cadj ${ac}">${Math.abs(tA)<1?'—':sgn(tA)}</td>`;
-      let nc=''; if(row.t==='eb'||row.t==='ebop') nc=tN>=0?'vll':'vn'; if(row.t==='s') nc=tN>=0?'vl':'vn';
+      let nc=''; if(row.t==='eb'||row.t==='ebop') nc=tN>=0?'vll':'vn'; if(row.t==='cm') nc=tN>=0?'vl':'vn';
       h+=`<td class="ctot cnew ${nc}">${fmt(tN)}</td>`;
     } else {
-      let vc=''; if(row.t==='eb'||row.t==='ebop') vc=tN>=0?'vll':'vn'; if(row.t==='s') vc=tN>=0?'vl':'vn';
+      let vc=''; if(row.t==='eb'||row.t==='ebop') vc=tN>=0?'vll':'vn'; if(row.t==='cm') vc=tN>=0?'vl':'vn';
       h+=`<td class="ctot ${vc}">${fmt(tN)}</td>`;
     }
     h+='</tr>';
@@ -1093,22 +1096,41 @@ async function exportPDF(){
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
   const W=297,H=210,M=10;
-  pdf.setFillColor(208,223,0); pdf.rect(0,0,W,12,'F');
-  pdf.setFont('helvetica','bold'); pdf.setFontSize(10); pdf.setTextColor(99,102,106);
-  pdf.text('TRAXION — Medistik · Modelo Financiero 2026',M,8);
-  pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
-  pdf.text('Generado: '+new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}),W-M,8,{align:'right'});
 
+  const drawHeader=()=>{
+    pdf.setFillColor(208,223,0); pdf.rect(0,0,W,12,'F');
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(10); pdf.setTextColor(99,102,106);
+    pdf.text('TRAXION — Medistik · Modelo Financiero 2026',M,8);
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
+    pdf.text('Generado: '+new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}),W-M,8,{align:'right'});
+  };
+
+  // Verificar si necesita nueva página (margen de 15mm al fondo)
+  const checkPage=(neededH)=>{
+    if(y+neededH > H-15){
+      pdf.setFont('helvetica','normal'); pdf.setFontSize(7); pdf.setTextColor(171,171,170);
+      pdf.text('Medistik · Traxion Logística y Tecnología · Confidencial',W/2,H-4,{align:'center'});
+      pdf.addPage();
+      drawHeader();
+      y=18;
+    }
+  };
+
+  drawHeader();
   const {res,b}=calcModel();
   let y=18;
+
   const ga=groups.filter(g=>g.on&&g.effects.some(e=>e.on));
   if(ga.length>0){
+    checkPage(8);
     pdf.setFont('helvetica','bold'); pdf.setFontSize(8); pdf.setTextColor(123,63,196);
     pdf.text('GRUPOS ACTIVOS:',M,y); y+=5;
     ga.forEach(g=>{
+      checkPage(6);
       pdf.setFont('helvetica','bold'); pdf.setFontSize(7.5); pdf.setTextColor(99,102,106);
       pdf.text('▸ '+g.nombre+'  →  Δ EBITDA: '+sgn(grpImpact(g)),M+3,y); y+=4;
       g.effects.filter(e=>e.on).forEach(e=>{
+        checkPage(4);
         pdf.setFont('helvetica','normal'); pdf.setFontSize(7); pdf.setTextColor(150,150,148);
         const tot=sum((e.montos||[]).map(v=>parseFloat(v)||0));
         pdf.text('    • '+e.nombre+' — '+RLBL[e.rubro]+', total anual: '+(tot>=0?'+':'')+fmt(tot),M+4,y); y+=3.5;
@@ -1118,6 +1140,9 @@ async function exportPDF(){
 
   const bEb=sum(b.ebitda), nEb=sum(res.ebitda);
   const nEbOp=sum(res.ebitda_op), nIng=sum(res.ingresos);
+
+  // KPIs — verificar espacio
+  checkPage(30);
   const kpis=[
     {l:'INGRESOS 2026',  v:fmtM(nIng)},
     {l:'EBITDA 2026',    v:fmtM(nEb)+' ('+fmtPct(nEb,nIng)+')'},
@@ -1149,6 +1174,9 @@ async function exportPDF(){
     {l:'  % ventas EBITDA Op',  ba:sum(b.ebitda_op)/sum(BASE.ingresos)*100, nw:nEbOp/nIng*100, pct:true},
   ];
   const cw=[65,38,38,38]; const rh=6.5;
+
+  // Header de tabla — verificar espacio para header + todas las filas
+  checkPage(rh*(trows.length+1)+5);
   pdf.setFillColor(99,102,106); pdf.rect(M,y,179,rh,'F');
   ['Rubro','Ppto Original','Δ Ajuste','Nuevo Ppto'].forEach((c,i)=>{
     const cx=M+cw.slice(0,i).reduce((a,b2)=>a+b2,0);
@@ -1157,7 +1185,8 @@ async function exportPDF(){
   }); y+=rh;
 
   trows.forEach((row,ri)=>{
-    const d=row.pct?row.nw-row.ba:row.nw-row.ba;
+    checkPage(rh+2);
+    const d=row.nw-row.ba;
     if(row.eb) pdf.setFillColor(26,53,80);
     else if(row.ebop) pdf.setFillColor(13,34,53);
     else if(row.otros) pdf.setFillColor(243,238,255);
@@ -1175,10 +1204,9 @@ async function exportPDF(){
       pdf.text(row.nw.toFixed(1)+'%',M+179-2,y+4.5,{align:'right'});
     } else {
       pdf.text(fmt(row.ba),M+cw[0]+cw[1]-2,y+4.5,{align:'right'});
-      const delta=d;
-      const dc=delta>0?[42,138,26]:[181,59,42];
-      pdf.setTextColor(Math.abs(delta)<1?180:dc[0],Math.abs(delta)<1?180:dc[1],Math.abs(delta)<1?178:dc[2]);
-      pdf.text(Math.abs(delta)<1?'—':(delta>0?'+':'')+fmt(delta),M+cw[0]+cw[1]+cw[2]-2,y+4.5,{align:'right'});
+      const dc=d>0?[42,138,26]:[181,59,42];
+      pdf.setTextColor(Math.abs(d)<1?180:dc[0],Math.abs(d)<1?180:dc[1],Math.abs(d)<1?178:dc[2]);
+      pdf.text(Math.abs(d)<1?'—':(d>0?'+':'')+fmt(d),M+cw[0]+cw[1]+cw[2]-2,y+4.5,{align:'right'});
       if(row.eb) pdf.setTextColor(208,223,0);
       else if(row.ebop) pdf.setTextColor(227,233,53);
       else pdf.setTextColor(row.bo?24:99,row.bo?90:102,row.bo?130:106);
@@ -1188,8 +1216,15 @@ async function exportPDF(){
     y+=rh;
   });
 
-  pdf.setFont('helvetica','normal'); pdf.setFontSize(7); pdf.setTextColor(171,171,170);
-  pdf.text('Medistik · Traxion Logística y Tecnología · Confidencial',W/2,H-4,{align:'center'});
+  // Footer en todas las páginas
+  const tp=pdf.getNumberOfPages();
+  for(let p=1;p<=tp;p++){
+    pdf.setPage(p);
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(7); pdf.setTextColor(171,171,170);
+    pdf.text('Medistik · Traxion Logística y Tecnología · Confidencial',W/2,H-4,{align:'center'});
+    pdf.text('Página '+p+' de '+tp,W-M,H-4,{align:'right'});
+  }
+
   pdf.save('Medistik_Modelo_2026_'+new Date().toISOString().slice(0,10)+'.pdf');
   toast('✓ PDF descargado','ok');
 }
