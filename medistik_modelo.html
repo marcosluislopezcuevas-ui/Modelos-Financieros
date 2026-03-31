@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modelo Financiero 2026 — Medistik</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" onerror="console.warn('jsPDF no cargó')"></script>
+<style>
+:root {
+  --lime:#D0DF00; --lime-dark:#B5BD00; --lime-deep:#8F8F00;
+  --lime-light:#E3E935; --lime-pale:#F4F9B0; --lime-bg:#F9FBD4;
+  --gray:#63666A; --gray-m:#97999B; --gray-d:#ABABAA;
+  --surface:#FAFAFA; --surface2:#F4F4F4;
+  --border:#E0E0DE; --border-m:#D0D0CE; --white:#FFFFFF;
+  --pos:#2A8A1A; --pos-bg:#EEF8EB;
+  --neg:#B53B2A; --neg-bg:#FDF0EE;
+  --blue:#185A82; --blue-bg:#EBF5FA;
+  --real:#7B3FC4; --real-bg:#F3EEFF;
+  --fh:'Barlow Condensed',sans-serif; --fb:'Barlow',sans-serif;
+  --r:8px; --rl:14px;
+}
+.gc-0{--gc:#2563EB;--gc-bg:#EFF6FF;--gc-bd:#93C5FD;}
+.gc-1{--gc:#16A34A;--gc-bg:#F0FDF4;--gc-bd:#86EFAC;}
+.gc-2{--gc:#DC2626;--gc-bg:#FEF2F2;--gc-bd:#FCA5A5;}
+.gc-3{--gc:#D97706;--gc-bg:#FFFBEB;--gc-bd:#FCD34D;}
+.gc-4{--gc:#7C3AED;--gc-bg:#F5F3FF;--gc-bd:#C4B5FD;}
+.gc-5{--gc:#0891B2;--gc-bg:#ECFEFF;--gc-bd:#67E8F9;}
+.gc-6{--gc:#BE185D;--gc-bg:#FDF2F8;--gc-bd:#F9A8D4;}
+.gc-7{--gc:#65A30D;--gc-bg:#F7FEE7;--gc-bd:#BEF264;}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--white);color:var(--gray);font-family:var(--fb);font-size:16px;min-height:100vh;}
+
+.nav{position:sticky;top:0;z-index:200;background:var(--white);border-bottom:3px solid var(--lime);
+  height:54px;display:flex;align-items:center;padding:0 24px;gap:12px;}
+.nav-brand{font-family:var(--fh);font-weight:800;font-size:21px;color:var(--gray);letter-spacing:-.01em;}
+.nav-sep{width:1px;height:24px;background:var(--border);flex-shrink:0;}
+.nav-sub{font-size:13px;color:var(--gray-m);}
+.nav-spacer{flex:1;}
+.nav-badge{font-family:var(--fh);font-weight:700;font-size:12px;letter-spacing:.04em;
+  padding:3px 10px;border-radius:4px;background:var(--lime-pale);color:var(--lime-deep);border:1px solid var(--lime-dark);}
+.nav-badge.on{background:var(--real-bg);color:var(--real);border-color:var(--real);}
+.btn-primary{background:var(--lime);color:var(--gray);border:none;border-radius:var(--r);
+  font-family:var(--fh);font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
+  padding:7px 16px;cursor:pointer;transition:background .15s;white-space:nowrap;}
+.btn-primary:hover{background:var(--lime-light);}
+.btn-ghost{background:transparent;color:var(--gray-m);border:1.5px solid var(--border-m);
+  border-radius:var(--r);font-family:var(--fh);font-weight:600;font-size:13px;
+  letter-spacing:.05em;text-transform:uppercase;padding:6px 14px;cursor:pointer;transition:all .15s;}
+.btn-ghost:hover{border-color:var(--lime-dark);color:var(--lime-deep);background:var(--lime-bg);}
+
+.app{display:flex;height:calc(100vh - 54px);}
+
+/* SIDEBAR */
+.panel{width:340px;flex-shrink:0;background:var(--surface);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.panel-hdr{padding:14px 16px 12px;border-bottom:1px solid var(--border);background:var(--white);}
+.panel-title{font-family:var(--fh);font-weight:800;font-size:18px;color:var(--gray);margin-bottom:2px;}
+.panel-sub{font-size:12px;color:var(--gray-m);line-height:1.5;}
+.panel-body{flex:1;overflow-y:auto;padding:12px 12px 0;}
+.panel-footer{padding:12px;border-top:1px solid var(--border);background:var(--white);display:flex;gap:8px;flex-direction:column;}
+
+.tog{width:36px;height:20px;border-radius:10px;flex-shrink:0;position:relative;
+  cursor:pointer;border:none;transition:background .2s;background:var(--border-m);}
+.tog::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;
+  background:var(--white);top:3px;left:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.25);}
+.tog.on{background:var(--gc,var(--real));}
+.tog.on::after{left:19px;}
+
+.grp-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--rl);
+  margin-bottom:10px;overflow:hidden;transition:border-color .15s,box-shadow .15s;}
+.grp-card.grp-on{border-color:var(--gc,var(--real));
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--gc,var(--real)) 12%,transparent);}
+.grp-head{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;
+  background:var(--gc-bg,var(--surface));border-bottom:1px solid var(--border);}
+.grp-dot{width:10px;height:10px;border-radius:50%;background:var(--gc,var(--gray-d));flex-shrink:0;}
+.grp-name{font-family:var(--fh);font-weight:800;font-size:15px;color:var(--gray);flex:1;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.grp-meta{font-family:var(--fh);font-weight:600;font-size:11px;color:var(--gray-d);white-space:nowrap;}
+.grp-impact{font-family:var(--fh);font-weight:800;font-size:13px;white-space:nowrap;}
+.grp-chev{font-size:11px;color:var(--gray-d);flex-shrink:0;transition:transform .2s;}
+.grp-card.expanded .grp-chev{transform:rotate(180deg);}
+.grp-body{display:none;}
+.grp-card.expanded .grp-body{display:block;}
+.grp-acts{display:flex;gap:6px;padding:8px 10px;border-bottom:1px solid var(--border);background:var(--surface);}
+.grp-btn{font-family:var(--fh);font-weight:700;font-size:11px;letter-spacing:.05em;text-transform:uppercase;
+  padding:4px 10px;border-radius:5px;cursor:pointer;border:1.5px solid var(--border-m);
+  background:transparent;color:var(--gray-m);transition:all .13s;}
+.grp-btn:hover{border-color:var(--gc,var(--real));color:var(--gc,var(--real));background:var(--gc-bg,var(--real-bg));}
+.grp-btn.del:hover{border-color:var(--neg);color:var(--neg);background:var(--neg-bg);}
+.eff-item{display:flex;align-items:center;gap:8px;padding:8px 10px;
+  border-bottom:1px solid var(--border);transition:background .12s;}
+.eff-item:last-child{border-bottom:none;}
+.eff-item:hover{background:var(--gc-bg,var(--surface));}
+.eff-item.off{opacity:.5;}
+.eff-info{flex:1;min-width:0;}
+.eff-name{font-family:var(--fh);font-weight:700;font-size:13px;color:var(--gray);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.eff-meta{font-size:11px;color:var(--gray-d);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.eff-val{font-family:var(--fh);font-weight:800;font-size:13px;white-space:nowrap;flex-shrink:0;}
+.eff-acts{display:flex;gap:2px;flex-shrink:0;}
+.eff-btn{background:none;border:none;cursor:pointer;padding:3px 5px;font-size:13px;
+  color:var(--gray-d);border-radius:4px;transition:all .12s;}
+.eff-btn:hover{background:var(--gc-bg,var(--surface2));color:var(--gray);}
+.eff-btn.del:hover{color:var(--neg);background:var(--neg-bg);}
+.grp-empty{padding:10px 12px;font-size:12px;color:var(--gray-d);font-family:var(--fh);font-weight:700;}
+.summary{background:var(--surface2);border-radius:var(--r);padding:10px 12px;}
+.sum-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.sum-row:last-child{margin-bottom:0;border-top:1px solid var(--border);padding-top:5px;margin-top:2px;}
+.sum-lbl{font-family:var(--fh);font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-d);}
+.sum-val{font-family:var(--fh);font-weight:800;font-size:14px;}
+.sum-val.pos{color:var(--pos);} .sum-val.neg{color:var(--neg);} .sum-val.neu{color:var(--gray-m);}
+.btn-new-grp{width:100%;padding:9px;border:2px dashed var(--border-m);border-radius:var(--rl);
+  background:transparent;cursor:pointer;font-family:var(--fh);font-weight:700;
+  font-size:13px;color:var(--gray-m);transition:all .15s;letter-spacing:.03em;}
+.btn-new-grp:hover{border-color:var(--lime-dark);color:var(--lime-deep);background:var(--lime-bg);}
+.empty{text-align:center;padding:28px 16px;color:var(--gray-d);
+  font-size:13px;font-family:var(--fh);font-weight:700;line-height:1.6;}
+.empty span{font-weight:400;font-size:12px;display:block;margin-top:4px;}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.tbl-hdr{background:var(--white);border-bottom:1px solid var(--border);
+  padding:14px 22px 10px;position:sticky;top:0;z-index:100;}
+.tbl-hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.tbl-title{font-family:var(--fh);font-weight:800;font-size:22px;letter-spacing:-.01em;}
+.tbl-acts{display:flex;gap:8px;align-items:center;}
+.vtog{display:flex;gap:1px;background:var(--surface2);border:1.5px solid var(--border-m);border-radius:6px;overflow:hidden;padding:2px;}
+.vt{font-family:var(--fh);font-weight:700;font-size:12px;letter-spacing:.05em;text-transform:uppercase;
+  padding:4px 11px;border:none;background:transparent;color:var(--gray-m);cursor:pointer;border-radius:4px;transition:all .13s;}
+.vt.on{background:var(--white);color:var(--gray);box-shadow:0 1px 3px rgba(0,0,0,.1);}
+.kpi-strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;}
+.kpi-strip::-webkit-scrollbar{display:none;}
+.kpi{flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:9px 14px;min-width:148px;}
+.kpi.hl{background:var(--lime-bg);border-color:var(--lime-dark);}
+.kpi.hl-real{background:var(--real-bg);border-color:var(--real);}
+.kpi.hl-grp{background:var(--gc-bg,var(--surface));border-color:var(--gc-bd,var(--border));border-left:3px solid var(--gc,var(--border-m));}
+.kpi-lbl{font-family:var(--fh);font-weight:700;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gray-d);margin-bottom:2px;}
+.kpi-val{font-family:var(--fh);font-weight:800;font-size:19px;line-height:1.1;}
+.kpi-val.lime{color:var(--lime-deep);} .kpi-val.pos{color:var(--pos);} .kpi-val.neg{color:var(--neg);}
+.kpi-val.grp{color:var(--gc,var(--gray));}
+.kpi-sub{font-size:11px;margin-top:2px;font-weight:600;color:var(--gray-d);}
+.kpi-sub.pos{color:var(--pos);} .kpi-sub.neg{color:var(--neg);}
+
+/* TABLE */
+.tbl-wrap{padding:14px 22px 40px;}
+.tbl-outer{border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;overflow-x:auto;}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;min-width:960px;}
+.tbl thead tr:first-child th{background:var(--gray);color:var(--white);font-family:var(--fh);font-weight:700;
+  font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:6px 10px;text-align:center;}
+.tbl thead tr:first-child th:first-child{text-align:left;background:#1A1C1E;min-width:210px;}
+.tbl thead tr:first-child th.ttot{background:#1A1C1E;}
+.tbl thead tr:nth-child(2) th{background:var(--surface2);color:var(--gray-m);font-family:var(--fh);font-weight:700;
+  font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;
+  text-align:right;border-bottom:2px solid var(--border);white-space:nowrap;}
+.tbl thead tr:nth-child(2) th:first-child{text-align:left;}
+.tbl thead tr:nth-child(2) th.cadj{color:var(--real);}
+.tbl thead tr:nth-child(2) th.cnew{color:var(--pos);}
+.tbl td{padding:7px 10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap;font-size:13px;}
+.tbl td:first-child{text-align:left;}
+.tbl tbody tr:hover td{background:rgba(208,223,0,.04);}
+
+/* Row types */
+.r-hdr td{background:var(--surface2);padding:3px 10px;border-top:1px solid var(--border-m);}
+.r-hdr td:first-child{font-family:var(--fh);font-weight:700;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gray-d);}
+.r-dat td:first-child{padding-left:20px;}
+.r-sub td{background:var(--surface2);font-weight:700;border-top:2px solid var(--border-m);border-bottom:2px solid var(--border-m);}
+.r-sub td:first-child{font-family:var(--fh);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.04em;}
+/* % row — subtle, italic */
+.r-pct td{background:var(--lime-bg);border-bottom:1px solid var(--lime-pale);}
+.r-pct td:first-child{font-family:var(--fh);font-weight:700;font-size:11px;color:var(--lime-deep);padding-left:20px;font-style:italic;letter-spacing:.03em;}
+.r-pct td{font-size:12px;color:var(--lime-deep);font-style:italic;font-weight:600;}
+/* EBITDA rows */
+.r-eb td{background:#1A3550;color:var(--white);font-weight:700;border-top:2px solid var(--blue);}
+.r-eb td:first-child{font-family:var(--fh);font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--lime);}
+.r-eb-pct td{background:#122436;color:rgba(208,223,0,.7);border-bottom:1px solid #0F2035;}
+.r-eb-pct td:first-child{font-family:var(--fh);font-weight:700;font-size:11px;padding-left:20px;font-style:italic;letter-spacing:.03em;}
+.r-eb-pct td{font-size:12px;font-style:italic;font-weight:600;}
+/* EBITDA Operativo */
+.r-ebop td{background:#0D2235;color:var(--white);font-weight:700;border-top:2px solid #0A1B2A;}
+.r-ebop td:first-child{font-family:var(--fh);font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--lime-light);}
+.r-ebop-pct td{background:#091929;color:rgba(227,233,53,.65);border-bottom:1px solid #091929;}
+.r-ebop-pct td:first-child{font-family:var(--fh);font-weight:700;font-size:11px;padding-left:20px;font-style:italic;letter-spacing:.03em;}
+.r-ebop-pct td{font-size:12px;font-style:italic;font-weight:600;}
+/* otros */
+.r-otros td{background:var(--real-bg);color:var(--gray);}
+.r-otros td:first-child{font-family:var(--fh);font-weight:700;font-size:13px;color:var(--real);}
+
+.cadj{background:rgba(123,63,196,.04);}
+.cnew{background:rgba(42,138,26,.04);}
+.ctot{background:var(--surface);font-weight:700;border-left:1px solid var(--border-m);}
+.r-eb .ctot{background:#0F2035;}
+.r-ebop .ctot{background:#091929;}
+.r-otros .ctot{background:var(--real-bg);}
+.vp{color:var(--pos);} .vn{color:var(--neg);} .vl{color:var(--lime-deep);font-weight:700;}
+.vz{color:var(--gray-d);} .vll{color:var(--lime);} .vrl{color:var(--real);}
+
+/* MODALS */
+.modal-bd{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);
+  z-index:500;align-items:center;justify-content:center;}
+.modal-bd.open{display:flex;}
+.modal{background:var(--white);border-radius:var(--rl);width:460px;
+  max-width:calc(100vw - 32px);box-shadow:0 8px 40px rgba(0,0,0,.18);}
+.modal-hdr{padding:18px 22px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;justify-content:space-between;}
+.modal-ttl{font-family:var(--fh);font-weight:800;font-size:20px;color:var(--gray);}
+.modal-sub{font-size:12px;color:var(--gray-m);margin-top:2px;}
+.modal-x{background:none;border:none;font-size:20px;color:var(--gray-m);cursor:pointer;padding:0 4px;line-height:1;}
+.modal-body{padding:18px 22px;}
+.modal-foot{padding:12px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
+.fl{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.fl2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.lbl{font-family:var(--fh);font-weight:700;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gray-d);}
+.inp{border:1.5px solid var(--border-m);border-radius:var(--r);padding:8px 10px;
+  font-family:var(--fb);font-size:14px;color:var(--gray);background:var(--white);
+  width:100%;transition:border-color .15s;outline:none;}
+.inp:focus{border-color:var(--real);box-shadow:0 0 0 3px var(--real-bg);}
+.sel{border:1.5px solid var(--border-m);border-radius:var(--r);padding:8px 10px;
+  font-family:var(--fb);font-size:14px;color:var(--gray);background:var(--white);
+  width:100%;cursor:pointer;outline:none;transition:border-color .15s;}
+.sel:focus{border-color:var(--real);}
+.cp{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+.cp-sw{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:all .15s;}
+.cp-sw:hover{transform:scale(1.15);}
+.cp-sw.sel{border-color:var(--gray);transform:scale(1.1);}
+.hint{font-size:12px;color:var(--gray-m);background:var(--surface);border-radius:var(--r);padding:8px 12px;line-height:1.5;}
+/* Grid mensual */
+.month-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:4px;}
+.month-cell{display:flex;flex-direction:column;gap:3px;}
+.month-cell-lbl{font-family:var(--fh);font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-d);text-align:center;}
+.month-inp{border:1.5px solid var(--border-m);border-radius:6px;padding:5px 6px;font-family:var(--fb);font-size:12px;
+  color:var(--gray);background:var(--white);width:100%;text-align:right;outline:none;transition:border-color .15s;}
+.month-inp:focus{border-color:var(--real);box-shadow:0 0 0 2px var(--real-bg);}
+.month-inp.has-val{border-color:var(--lime-dark);background:var(--lime-bg);}
+.modal-wide{width:560px;}
+.month-tools{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center;}
+.mt-lbl{font-size:12px;color:var(--gray-m);flex:1;}
+.mt-btn{font-family:var(--fh);font-weight:700;font-size:11px;letter-spacing:.04em;
+  padding:4px 10px;border-radius:5px;cursor:pointer;border:1.5px solid var(--border-m);
+  background:transparent;color:var(--gray-m);transition:all .13s;white-space:nowrap;}
+.mt-btn:hover{border-color:var(--real);color:var(--real);background:var(--real-bg);}
+.mt-fill-wrap{display:flex;gap:4px;align-items:center;}
+.mt-fill-inp{border:1.5px solid var(--border-m);border-radius:6px;padding:4px 8px;font-family:var(--fb);font-size:12px;
+  color:var(--gray);background:var(--white);width:130px;outline:none;}
+.mt-fill-inp:focus{border-color:var(--real);}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--gray);color:var(--white);
+  font-family:var(--fh);font-weight:700;font-size:14px;letter-spacing:.03em;
+  padding:10px 18px;border-radius:var(--r);z-index:1000;
+  opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.ok{background:var(--pos);} .toast.warn{background:#C06000;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border-m);border-radius:3px;}
+/* SP overlay */
+.sp-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.85);
+  z-index:900;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+.sp-overlay.show{display:flex;}
+.sp-spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--lime-dark);
+  border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.sp-msg{font-family:var(--fh);font-weight:700;font-size:15px;color:var(--gray);letter-spacing:.03em;}
+.nav-sp-status{font-size:11px;color:var(--gray-m);font-family:var(--fh);font-weight:600;
+  letter-spacing:.04em;padding:2px 8px;border-radius:4px;background:var(--surface2);
+  border:1px solid var(--border);white-space:nowrap;}
+.nav-sp-status.ok{background:var(--pos-bg);color:var(--pos);border-color:var(--pos);}
+.nav-sp-status.err{background:var(--neg-bg);color:var(--neg);border-color:var(--neg);}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-brand">TRAXION</span>
+  <div class="nav-sep"></div>
+  <span class="nav-sub">Medistik · Modelo Financiero 2026</span>
+  <div class="nav-spacer"></div>
+  <span class="nav-sp-status" id="sp-status">● Local</span>
+  <span class="nav-badge" id="nav-badge">Sin efectos</span>
+  <button class="btn-ghost" onclick="spRead()" id="btn-read">↓ Cargar SP</button>
+  <button class="btn-ghost" onclick="spWrite()" id="btn-write">↑ Guardar SP</button>
+  <button class="btn-ghost" onclick="exportPDF()">↓ PDF</button>
+  <button class="btn-primary" onclick="recalcular()">⟳ Recalcular</button>
+</nav>
+
+<div class="app">
+  <aside class="panel">
+    <div class="panel-hdr">
+      <div class="panel-title">Escenarios</div>
+      <div class="panel-sub">Activa o desactiva grupos enteros para ver cómo se mueve el EBITDA</div>
+    </div>
+    <div class="panel-body" id="groups-list"></div>
+    <div class="panel-footer">
+      <div class="summary">
+        <div class="sum-row"><span class="sum-lbl">Δ Ingresos</span><span class="sum-val neu" id="s-ing">—</span></div>
+        <div class="sum-row"><span class="sum-lbl">Δ Costos</span><span class="sum-val neu" id="s-cos">—</span></div>
+        <div class="sum-row"><span class="sum-lbl">Δ EBITDA anual</span><span class="sum-val neu" id="s-eb">—</span></div>
+      </div>
+      <button class="btn-new-grp" onclick="openGrpModal()">＋ Nuevo grupo de efectos</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <div class="tbl-hdr">
+      <div class="tbl-hdr-top">
+        <div class="tbl-title">Presupuesto 2026 · Ajustado</div>
+        <div class="tbl-acts">
+          <div class="vtog">
+            <button class="vt on" id="vt-c" onclick="setVista('c')">Completa</button>
+            <button class="vt"    id="vt-d" onclick="setVista('d')">Solo Δ</button>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-strip" id="kpi-strip"></div>
+    </div>
+    <div class="tbl-wrap">
+      <div class="tbl-outer">
+        <table class="tbl" id="main-tbl"></table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL GRUPO -->
+<div class="modal-bd" id="mg" onclick="if(event.target===this)closeGrpModal()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div><div class="modal-ttl" id="mg-ttl">Nuevo Grupo</div>
+      <div class="modal-sub">Agrupa efectos relacionados para manejarlos como un escenario</div></div>
+      <button class="modal-x" onclick="closeGrpModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fl"><span class="lbl">Nombre del grupo</span>
+        <input class="inp" id="mg-nom" type="text" placeholder="Ej: Cliente Nuevo Farma, Salida RedPack…"></div>
+      <div class="fl"><span class="lbl">Color</span>
+        <div class="cp" id="cp"></div></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeGrpModal()">Cancelar</button>
+      <button class="btn-primary" onclick="saveGrp()">Guardar grupo</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EFECTO -->
+<div class="modal-bd" id="me" onclick="if(event.target===this)closeEffModal()">
+  <div class="modal modal-wide">
+    <div class="modal-hdr">
+      <div><div class="modal-ttl" id="me-ttl">Nuevo Efecto</div>
+      <div class="modal-sub" id="me-sub">Ingresa el monto de cada mes (positivo = incremento, negativo = reducción)</div></div>
+      <button class="modal-x" onclick="closeEffModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fl2" style="margin-bottom:10px">
+        <div class="fl" style="margin-bottom:0"><span class="lbl">Nombre</span>
+          <input class="inp" id="me-nom" type="text" placeholder="Ej: Ventas adicionales…"></div>
+        <div class="fl" style="margin-bottom:0"><span class="lbl">Rubro</span>
+          <select class="sel" id="me-rub" onchange="updHint()">
+            <option value="ingresos">Ingresos</option>
+            <option value="costos_var">Costos Variables</option>
+            <option value="costos_fijos">Costos Fijos</option>
+            <option value="gastos_grales">Gastos Generales</option>
+          </select></div>
+      </div>
+      <!-- Herramientas de llenado rápido -->
+      <div class="month-tools">
+        <span class="mt-lbl">Llenado rápido:</span>
+        <div class="mt-fill-wrap">
+          <input class="mt-fill-inp" id="mt-fill-val" type="text" inputmode="numeric" placeholder="Monto"
+            onfocus="this.value=this.value.replace(/,/g,'')" onblur="fmtBlur(this)">
+          <button class="mt-btn" onclick="fillAllMonths()">Aplicar a todos</button>
+        </div>
+        <button class="mt-btn" onclick="clearAllMonths()">Limpiar</button>
+      </div>
+      <!-- Grid 12 meses -->
+      <div class="month-grid" id="month-grid"></div>
+      <div class="hint" id="hint" style="margin-top:10px"></div>
+    </div>
+    <div class="modal-foot">
+      <div id="me-total" style="font-family:var(--fh);font-weight:800;font-size:14px;color:var(--gray-m);margin-right:auto;align-self:center;">Total anual: —</div>
+      <button class="btn-ghost" onclick="closeEffModal()">Cancelar</button>
+      <button class="btn-primary" onclick="saveEff()">Guardar efecto</button>
+    </div>
+  </div>
+</div>
+
+<!-- SP Overlay -->
+<div class="sp-overlay" id="sp-overlay">
+  <div class="sp-spinner"></div>
+  <div class="sp-msg" id="sp-overlay-msg">Conectando con SharePoint…</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONSTANTES ────────────────────────────────────────────────
+const MESES  = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MSHT   = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const RLBL   = {ingresos:'Ingresos',costos_var:'Costos Variables',costos_fijos:'Costos Fijos',gastos_grales:'Gastos Generales'};
+const HINTS  = {
+  ingresos:     '💡 Positivo = más ingresos → mejora EBITDA. Negativo = reduce EBITDA.',
+  costos_var:   '💡 Positivo = sube costo variable → reduce EBITDA. Negativo = ahorras → mejora.',
+  costos_fijos: '💡 Positivo = sube costo fijo → reduce EBITDA. Negativo = ahorras → mejora.',
+  gastos_grales:'💡 Positivo = sube gastos generales → reduce EBITDA. Negativo = ahorras → mejora.'
+};
+const COLORS = [
+  {id:0,hex:'#2563EB'},{id:1,hex:'#16A34A'},{id:2,hex:'#DC2626'},{id:3,hex:'#D97706'},
+  {id:4,hex:'#7C3AED'},{id:5,hex:'#0891B2'},{id:6,hex:'#BE185D'},{id:7,hex:'#65A30D'}
+];
+
+// ── PRESUPUESTO BASE 2026 — MEDISTIK (datos del Excel) ────────
+const BASE = {
+  ingresos:     [61984927.774031006,65231981.655169256,68175761.92193715,71700304.63911241,78138296.40453747,78858396.05725023,83397459.69741704,79246412.45956025,88875736.61152616,87902349.45401487,89836551.74925005,76474986.38637038],
+  costos_var:   [26097026.031770594,27159772.563660312,27710633.933229942,30040480.60449831,30855164.274332542,31645572.962655116,33750801.19753231,32379726.659351446,35534668.904218584,33620660.4789894,35677920.4653117,30853078.79708355],
+  costos_fijos: [12036719.4777567,13088526.850100014,13562454.539472146,13449232.527908096,13388268.773174187,13354048.939317772,13198927.81223402,13263341.019499345,13191021.958775328,13113437.439939756,12959587.153074851,13097503.50527923],
+  gastos_grales:[11296643.244084634,9708283.068369344,9558007.879484605,9432329.382101577,9750041.356518319,9215921.818338944,9430688.23589174,9323429.615690514,9297242.238037251,9278500.473234935,9261567.151587527,9572594.883399999],
+  // Otros (ingresos) gastos neto — fijo del presupuesto, no afectable por efectos
+  otros_ing_gas:[0,-1252473.9196989324,-1252473.9196989324,-1431398.7653702083,-1431398.7653702083,-1431398.7653702083,-1610323.6110414844,-1610323.6110414844,-1789248.4567127605,-1610323.6110414844,-1789248.4567127605,-1431398.7653702083]
+};
+// Corregir el signo (en el Excel son valores que restan — los ingresamos como positivos, pues la fórmula ya los resta)
+// EBITDA Operativo = EBITDA + Otros Ing/Gas (que en el Excel son negativos = ingreso)
+const OTROS_BASE = [0,-1252473.9196989324,-1252473.9196989324,-1431398.7653702083,-1431398.7653702083,-1431398.7653702083,-1610323.6110414844,-1610323.6110414844,-1789248.4567127605,-1610323.6110414844,-1789248.4567127605,-1431398.7653702083];
+
+// ── ESTADO ────────────────────────────────────────────────────
+let groups = [];
+let vista  = 'c';
+let _seq   = 1;
+function uid(){ return 'i'+(_seq++)+Math.random().toString(36).slice(2,5); }
+let editGrpId=null, editEffId=null, effGrpId=null, selColor=0;
+
+// ── CÁLCULO ───────────────────────────────────────────────────
+function sum(a){ return a.reduce((s,v)=>s+v,0); }
+
+function calcAdj(){
+  const adj={ingresos:new Array(12).fill(0),costos_var:new Array(12).fill(0),costos_fijos:new Array(12).fill(0),gastos_grales:new Array(12).fill(0)};
+  groups.filter(g=>g.on).forEach(g=>{
+    g.effects.filter(e=>e.on).forEach(e=>{
+      const montos=e.montos||new Array(12).fill(0);
+      for(let i=0;i<12;i++) adj[e.rubro][i]+=(parseFloat(montos[i])||0);
+    });
+  });
+  return adj;
+}
+
+function calcModel(){
+  const adj=calcAdj();
+  const res={};
+  ['ingresos','costos_var','costos_fijos','gastos_grales'].forEach(k=>{
+    res[k]=BASE[k].map((v,i)=>v+adj[k][i]);
+  });
+  res.cm     = res.ingresos.map((v,i)=>v-res.costos_var[i]);
+  res.tc     = res.costos_var.map((v,i)=>v+res.costos_fijos[i]+res.gastos_grales[i]);
+  res.ebitda = res.ingresos.map((v,i)=>v-res.tc[i]);
+  // EBITDA Operativo = EBITDA + Otros (fijo, no ajustable)
+  res.ebitda_op = res.ebitda.map((v,i)=>v+OTROS_BASE[i]);
+
+  const b={};
+  b.cm      = BASE.ingresos.map((v,i)=>v-BASE.costos_var[i]);
+  b.tc      = BASE.costos_var.map((v,i)=>v+BASE.costos_fijos[i]+BASE.gastos_grales[i]);
+  b.ebitda  = BASE.ingresos.map((v,i)=>v-b.tc[i]);
+  b.ebitda_op = b.ebitda.map((v,i)=>v+OTROS_BASE[i]);
+  return {res,adj,b};
+}
+
+function grpImpact(g){
+  let dI=0,dC=0;
+  g.effects.filter(e=>e.on).forEach(e=>{
+    const t=sum((e.montos||[]).map(v=>parseFloat(v)||0));
+    if(e.rubro==='ingresos') dI+=t; else dC+=t;
+  });
+  return dI-dC;
+}
+function effImpact(e){
+  const t=sum((e.montos||[]).map(v=>parseFloat(v)||0));
+  return e.rubro==='ingresos'?t:-t;
+}
+function effTotalAnual(e){
+  return sum((e.montos||[]).map(v=>parseFloat(v)||0));
+}
+
+// ── FORMATO ───────────────────────────────────────────────────
+function fmt(v){return v.toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function fmtM(v){return (v/1e6).toLocaleString('es-MX',{minimumFractionDigits:1,maximumFractionDigits:1})+'M';}
+function fmtPct(v,ing){if(!ing) return '—'; return (v/ing*100).toFixed(1)+'%';}
+function sgn(v){return Math.abs(v)<1?'—':(v>0?'+':'')+fmt(v);}
+function sgnM(v){return Math.abs(v)<1000?'—':(v>0?'+':'')+fmtM(v);}
+function pctS(a,b){if(!b) return ''; const p=(a-b)/Math.abs(b)*100; return (p>=0?'+':'')+p.toFixed(1)+'%';}
+function fmtBlur(el){const n=parseFloat(el.value.replace(/,/g,'')); if(!isNaN(n)) el.value=n.toLocaleString('es-MX');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── RENDER GRUPOS ─────────────────────────────────────────────
+function renderGroups(){
+  const el=document.getElementById('groups-list');
+  if(!groups.length){
+    el.innerHTML=`<div class="empty">Sin grupos todavía.<span>Crea un grupo para empezar a modelar escenarios.</span></div>`;
+    updSummary(); return;
+  }
+  let h='';
+  groups.forEach(g=>{
+    const gcc='gc-'+(g.colorId%8);
+    const imp=grpImpact(g);
+    const onGrp=g.on&&g.effects.some(e=>e.on);
+    const impC=imp>0?'vp':imp<0?'vn':'';
+    const impTx=onGrp&&Math.abs(imp)>0?`<div class="grp-impact ${impC}">${imp>0?'+':''}${fmtM(imp)}</div>`:'';
+    const ea=g.effects.filter(e=>e.on).length;
+    h+=`<div class="grp-card ${gcc} ${g.on?'grp-on':''} ${g.exp?'expanded':''}" id="gc-${g.id}">
+      <div class="grp-head" onclick="togExp('${g.id}')">
+        <button class="tog ${g.on?'on':''}" onclick="event.stopPropagation();togGrp('${g.id}')" title="${g.on?'Desactivar':'Activar'}"></button>
+        <div class="grp-dot"></div>
+        <div class="grp-name">${esc(g.nombre)}</div>
+        <div class="grp-meta">${ea}/${g.effects.length} efecto${g.effects.length!==1?'s':''}</div>
+        ${impTx}
+        <span class="grp-chev">▼</span>
+      </div>
+      <div class="grp-body">
+        <div class="grp-acts">
+          <button class="grp-btn" onclick="openEffModal('${g.id}')">＋ Efecto</button>
+          <button class="grp-btn" onclick="openGrpModal('${g.id}')">✏ Renombrar</button>
+          <div style="flex:1"></div>
+          <button class="grp-btn del" onclick="delGrp('${g.id}')">✕ Eliminar</button>
+        </div>
+        ${g.effects.length===0
+          ?`<div class="grp-empty">Sin efectos — usa "+ Efecto" para agregar</div>`
+          :g.effects.map(e=>{
+              const imp2=effImpact(e);
+              const ic=imp2>0?'vp':imp2<0?'vn':'vz';
+              const ivl=Math.abs(imp2)<1?'—':(imp2>0?'+':'')+fmtM(imp2);
+              const tot=effTotalAnual(e);
+              const nonZero=(e.montos||[]).filter(v=>parseFloat(v)||0).length;
+              const mt=RLBL[e.rubro]+' · '+nonZero+' mes'+(nonZero!==1?'es':'')+' · total '+(tot>=0?'+':'')+fmtM(tot);
+              return `<div class="eff-item ${e.on?'':'off'}">
+                <button class="tog ${e.on?'on':''}" onclick="togEff('${g.id}','${e.id}')"></button>
+                <div class="eff-info">
+                  <div class="eff-name">${esc(e.nombre)}</div>
+                  <div class="eff-meta">${RLBL[e.rubro]} · ${mt}</div>
+                </div>
+                <div class="eff-val ${ic}">${ivl}</div>
+                <div class="eff-acts">
+                  <button class="eff-btn" onclick="openEffModal('${g.id}','${e.id}')">✏</button>
+                  <button class="eff-btn del" onclick="delEff('${g.id}','${e.id}')">✕</button>
+                </div>
+              </div>`;
+            }).join('')
+        }
+      </div>
+    </div>`;
+  });
+  el.innerHTML=h;
+  updSummary();
+}
+
+function updSummary(){
+  const {adj}=calcModel();
+  const dI=sum(adj.ingresos);
+  const dC=sum(adj.costos_var)+sum(adj.costos_fijos)+sum(adj.gastos_grales);
+  const dE=dI-dC;
+  const set=(id,v,inv)=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.textContent=Math.abs(v)<1?'—':sgn(v);
+    el.className='sum-val '+(Math.abs(v)<1?'neu':(inv?(v>0?'neg':'pos'):(v>0?'pos':'neg')));
+  };
+  set('s-ing',dI,false); set('s-cos',dC,true); set('s-eb',dE,false);
+  const ga=groups.filter(g=>g.on).length;
+  const te=groups.reduce((a,g)=>a+g.effects.filter(e=>e.on).length,0);
+  const bd=document.getElementById('nav-badge');
+  if(ga===0){bd.textContent='Sin efectos';bd.className='nav-badge';}
+  else{bd.textContent=`${ga} grupo${ga>1?'s':''} · ${te} efecto${te!==1?'s':''}`;bd.className='nav-badge on';}
+}
+
+// ── RENDER KPIs ───────────────────────────────────────────────
+function renderKPIs(){
+  const {res,b}=calcModel();
+  const hasAny=groups.some(g=>g.on&&g.effects.some(e=>e.on));
+  const bEb=sum(b.ebitda), nEb=sum(res.ebitda);
+  const bEbOp=sum(b.ebitda_op), nEbOp=sum(res.ebitda_op);
+  const bIng=sum(BASE.ingresos), nIng=sum(res.ingresos);
+  const dEb=nEb-bEb, nMgn=nEb/nIng*100, bMgn=bEb/bIng*100;
+  let h='';
+  h+=`<div class="kpi"><div class="kpi-lbl">Ingresos 2026</div>
+    <div class="kpi-val lime">${fmtM(nIng)}</div>
+    <div class="kpi-sub ${nIng>bIng?'pos':nIng<bIng?'neg':''}">${hasAny&&Math.abs(nIng-bIng)>0?sgn(nIng-bIng):'Base'}</div></div>`;
+  h+=`<div class="kpi hl"><div class="kpi-lbl">EBITDA 2026</div>
+    <div class="kpi-val ${nEb>=0?'lime':'neg'}">${fmtM(nEb)}</div>
+    <div class="kpi-sub ${dEb>0?'pos':dEb<0?'neg':''}">${hasAny&&Math.abs(dEb)>0?sgnM(dEb)+' vs base':'Base'} · ${nMgn.toFixed(1)}%</div></div>`;
+  h+=`<div class="kpi"><div class="kpi-lbl">EBITDA Operativo</div>
+    <div class="kpi-val ${nEbOp>=0?'lime':'neg'}">${fmtM(nEbOp)}</div>
+    <div class="kpi-sub ${nEbOp>bEbOp?'pos':nEbOp<bEbOp?'neg':''}">${hasAny&&Math.abs(nEbOp-bEbOp)>0?sgnM(nEbOp-bEbOp)+' vs base':'Base'} · ${(nEbOp/nIng*100).toFixed(1)}%</div></div>`;
+  if(hasAny){
+    h+=`<div class="kpi hl-real"><div class="kpi-lbl">Δ EBITDA anual</div>
+      <div class="kpi-val ${dEb>=0?'pos':'neg'}">${sgnM(dEb)}</div>
+      <div class="kpi-sub">${pctS(nEb,bEb)} vs presupuesto</div></div>`;
+  }
+  groups.filter(g=>g.on&&g.effects.some(e=>e.on)).forEach(g=>{
+    const gcc='gc-'+(g.colorId%8);
+    const imp=grpImpact(g);
+    h+=`<div class="kpi hl-grp ${gcc}"><div class="kpi-lbl">${esc(g.nombre)}</div>
+      <div class="kpi-val grp">${sgnM(imp)}</div>
+      <div class="kpi-sub">en EBITDA</div></div>`;
+  });
+  document.getElementById('kpi-strip').innerHTML=h;
+}
+
+// ── RENDER TABLA ──────────────────────────────────────────────
+// ROWS: type h=header, d=data, s=subtotal, pct=porcentaje, eb=ebitda, ebpct=%, otros, ebop, eboppct
+const ROWS=[
+  {t:'h',  lbl:'Ingresos'},
+  {t:'d',  lbl:'Ingresos Netos',        rk:'ingresos',    ak:'ingresos'},
+  {t:'s',  lbl:'Contribución Marginal', rk:'cm',          bk:'cm'},
+  {t:'pct',lbl:'% sobre ventas',        ref:'cm'},
+  {t:'h',  lbl:'Costos'},
+  {t:'d',  lbl:'Costos Variables',      rk:'costos_var',  ak:'costos_var',    neg:true},
+  {t:'d',  lbl:'Costos Fijos',          rk:'costos_fijos',ak:'costos_fijos',  neg:true},
+  {t:'d',  lbl:'Gastos Generales',      rk:'gastos_grales',ak:'gastos_grales',neg:true},
+  {t:'s',  lbl:'Total Costos',          rk:'tc',          bk:'tc',            neg:true},
+  {t:'eb', lbl:'EBITDA',               rk:'ebitda',      bk:'ebitda'},
+  {t:'ebpct', lbl:'% sobre ventas',    ref:'ebitda'},
+  {t:'otros', lbl:'Otros (ingresos) gastos, neto', rk:'otros_fixed'},
+  {t:'ebop',  lbl:'EBITDA Operativo',  rk:'ebitda_op',   bk:'ebitda_op'},
+  {t:'eboppct',lbl:'% sobre ventas',   ref:'ebitda_op'},
+];
+
+function renderTable(){
+  const {res,adj,b}=calcModel();
+  const tbl=document.getElementById('main-tbl');
+  const hasAny=groups.some(g=>g.on&&g.effects.some(e=>e.on));
+  const showBase=vista==='c';
+  const adjCols=hasAny?(showBase?3:2):1;
+
+  let h='<thead><tr><th></th>';
+  MSHT.forEach(ms=>h+=`<th colspan="${adjCols}">${ms}</th>`);
+  h+=`<th colspan="${adjCols}" class="ttot">TOTAL</th></tr>`;
+  h+='<tr><th style="text-align:left;font-size:11px;color:var(--gray-m)">Rubro</th>';
+  MSHT.forEach(()=>{
+    if(hasAny){if(showBase) h+='<th>Ppto</th>'; h+='<th class="cadj">Ajuste</th><th class="cnew">Nuevo</th>';}
+    else h+='<th>Ppto</th>';
+  });
+  if(hasAny){if(showBase) h+='<th class="ctot">Ppto</th>'; h+='<th class="ctot cadj">Ajuste</th><th class="ctot cnew">Nuevo</th>';}
+  else h+='<th class="ctot">Total</th>';
+  h+='</tr></thead><tbody>';
+
+  ROWS.forEach(row=>{
+    // ── HEADER ROW
+    if(row.t==='h'){
+      const sp=adjCols*12+adjCols+1;
+      h+=`<tr class="r-hdr"><td>${row.lbl}</td><td colspan="${sp}"></td></tr>`; return;
+    }
+
+    // ── PCT ROW (% sobre ventas de la fila previa de resultado)
+    if(row.t==='pct'||row.t==='ebpct'||row.t==='eboppct'){
+      const rclass=row.t==='pct'?'r-pct':row.t==='ebpct'?'r-eb-pct':'r-ebop-pct';
+      h+=`<tr class="${rclass}"><td>${row.lbl}</td>`;
+      let totVal=0, totIng=0;
+      for(let i=0;i<12;i++){
+        const refVal=res[row.ref]?.[i]??0;
+        const ingVal=res.ingresos[i]||1;
+        totVal+=refVal; totIng+=res.ingresos[i]||0;
+        const pv=fmtPct(refVal,ingVal);
+        if(hasAny){
+          if(showBase){
+            const bRefVal=b[row.ref]?.[i]??BASE[row.ref]?.[i]??0;
+            h+=`<td>${fmtPct(bRefVal,BASE.ingresos[i]||1)}</td>`;
+          }
+          h+=`<td>—</td><td>${pv}</td>`;
+        } else {
+          h+=`<td>${pv}</td>`;
+        }
+      }
+      const pvTot=fmtPct(totVal,totIng);
+      if(hasAny){
+        if(showBase){
+          const btot=sum(b[row.ref]??[]);
+          h+=`<td class="ctot">${fmtPct(btot,sum(BASE.ingresos))}</td>`;
+        }
+        h+=`<td class="ctot cadj">—</td><td class="ctot cnew">${pvTot}</td>`;
+      } else {
+        h+=`<td class="ctot">${pvTot}</td>`;
+      }
+      h+='</tr>'; return;
+    }
+
+    // ── OTROS ROW (fijo, no ajustable)
+    if(row.t==='otros'){
+      h+=`<tr class="r-otros"><td>${row.lbl}</td>`;
+      let tot=0;
+      for(let i=0;i<12;i++){
+        const v=OTROS_BASE[i];
+        tot+=v;
+        const vc=v<0?'vp':v>0?'vn':'vz';
+        if(hasAny){
+          if(showBase) h+=`<td class="${vc}">${fmt(v)}</td>`;
+          h+=`<td class="cadj vz">—</td><td class="cnew ${vc}">${fmt(v)}</td>`;
+        } else {
+          h+=`<td class="${vc}">${fmt(v)}</td>`;
+        }
+      }
+      const tc2=tot<0?'vp':tot>0?'vn':'vz';
+      if(hasAny){
+        if(showBase) h+=`<td class="ctot ${tc2}">${fmt(tot)}</td>`;
+        h+=`<td class="ctot cadj vz">—</td><td class="ctot cnew ${tc2}">${fmt(tot)}</td>`;
+      } else {
+        h+=`<td class="ctot ${tc2}">${fmt(tot)}</td>`;
+      }
+      h+='</tr>'; return;
+    }
+
+    // ── DATA / SUBTOTAL / EBITDA / EBITDA_OP ROWS
+    const rcMap={d:'r-dat',s:'r-sub',eb:'r-eb',ebop:'r-ebop'};
+    const rc=rcMap[row.t]||'r-dat';
+    h+=`<tr class="${rc}"><td>${row.lbl}</td>`;
+    let tB=0,tA=0,tN=0;
+
+    for(let i=0;i<12;i++){
+      const bv=row.bk?b[row.bk][i]:(BASE[row.rk]?BASE[row.rk][i]:0);
+      const nv=res[row.rk]?res[row.rk][i]:0;
+      const av=adj[row.ak]?adj[row.ak][i]:(nv-bv);
+      tB+=bv; tA+=av; tN+=nv;
+
+      if(hasAny){
+        if(showBase){
+          const bc=(row.t==='eb'||row.t==='ebop')?'vll':'vz';
+          h+=`<td class="${bc}">${fmt(bv)}</td>`;
+        }
+        let ac='vz';
+        if(Math.abs(av)>=1) ac=(row.neg?av<0:av>0)?'vp':'vn';
+        h+=`<td class="cadj ${ac}">${Math.abs(av)<1?'—':sgn(av)}</td>`;
+        let nc=''; if(row.t==='eb'||row.t==='ebop') nc=nv>=0?'vll':'vn'; if(row.t==='s') nc=nv>=0?'vl':'vn';
+        h+=`<td class="cnew ${nc}">${fmt(nv)}</td>`;
+      } else {
+        let vc=''; if(row.t==='eb'||row.t==='ebop') vc=nv>=0?'vll':'vn'; if(row.t==='s') vc=nv>=0?'vl':'vn';
+        h+=`<td class="${vc}">${fmt(nv)}</td>`;
+      }
+    }
+
+    if(hasAny){
+      if(showBase){const bc=(row.t==='eb'||row.t==='ebop')?'vll':'vz';h+=`<td class="ctot ${bc}">${fmt(tB)}</td>`;}
+      let ac='vz'; if(Math.abs(tA)>=1) ac=(row.neg?tA<0:tA>0)?'vp':'vn';
+      h+=`<td class="ctot cadj ${ac}">${Math.abs(tA)<1?'—':sgn(tA)}</td>`;
+      let nc=''; if(row.t==='eb'||row.t==='ebop') nc=tN>=0?'vll':'vn'; if(row.t==='s') nc=tN>=0?'vl':'vn';
+      h+=`<td class="ctot cnew ${nc}">${fmt(tN)}</td>`;
+    } else {
+      let vc=''; if(row.t==='eb'||row.t==='ebop') vc=tN>=0?'vll':'vn'; if(row.t==='s') vc=tN>=0?'vl':'vn';
+      h+=`<td class="ctot ${vc}">${fmt(tN)}</td>`;
+    }
+    h+='</tr>';
+  });
+
+  h+='</tbody>';
+  tbl.innerHTML=h;
+}
+
+// ── ACCIONES ──────────────────────────────────────────────────
+function togGrp(id){const g=groups.find(x=>x.id===id); if(g){g.on=!g.on; save(); recalcular();}}
+function togExp(id){const g=groups.find(x=>x.id===id); if(g){g.exp=!g.exp; renderGroups();}}
+function delGrp(id){if(!confirm('¿Eliminar este grupo y todos sus efectos?')) return; groups=groups.filter(x=>x.id!==id); save(); recalcular(); toast('Grupo eliminado','');}
+function togEff(gid,eid){const g=groups.find(x=>x.id===gid); if(!g) return; const e=g.effects.find(x=>x.id===eid); if(e){e.on=!e.on; save(); recalcular();}}
+function delEff(gid,eid){const g=groups.find(x=>x.id===gid); if(!g) return; g.effects=g.effects.filter(x=>x.id!==eid); save(); recalcular(); toast('Efecto eliminado','');}
+
+function nextColor(){const used=new Set(groups.map(g=>g.colorId)); for(let i=0;i<8;i++){if(!used.has(i)) return i;} return groups.length%8;}
+function renderCP(){document.getElementById('cp').innerHTML=COLORS.map(c=>`<div class="cp-sw ${selColor===c.id?'sel':''}" style="background:${c.hex}" onclick="pickColor(${c.id})"></div>`).join('');}
+function pickColor(id){selColor=id; renderCP();}
+
+function openGrpModal(id){
+  editGrpId=id||null;
+  const g=id?groups.find(x=>x.id===id):null;
+  document.getElementById('mg-ttl').textContent=g?'Renombrar Grupo':'Nuevo Grupo';
+  document.getElementById('mg-nom').value=g?g.nombre:'';
+  selColor=g?g.colorId:nextColor();
+  renderCP();
+  document.getElementById('mg').classList.add('open');
+  setTimeout(()=>document.getElementById('mg-nom').focus(),80);
+}
+function closeGrpModal(){document.getElementById('mg').classList.remove('open');}
+function saveGrp(){
+  const nom=document.getElementById('mg-nom').value.trim();
+  if(!nom){toast('Ponle nombre al grupo','warn'); return;}
+  if(editGrpId){const g=groups.find(x=>x.id===editGrpId); if(g){g.nombre=nom;g.colorId=selColor;} toast('Grupo actualizado','ok');}
+  else{groups.push({id:uid(),nombre:nom,colorId:selColor,on:true,exp:true,effects:[]}); toast('Grupo creado ✓','ok');}
+  closeGrpModal(); save(); recalcular();
+}
+
+function updHint(){document.getElementById('hint').textContent=HINTS[document.getElementById('me-rub').value]||'';}
+
+function buildMonthGrid(montos){
+  const grid=document.getElementById('month-grid');
+  grid.innerHTML=MSHT.map((ms,i)=>{
+    const v=parseFloat(montos[i])||0;
+    const hasVal=v!==0;
+    return `<div class="month-cell">
+      <span class="month-cell-lbl">${ms}</span>
+      <input class="month-inp ${hasVal?'has-val':''}" id="mi-${i}" type="text" inputmode="decimal"
+        value="${hasVal?v.toLocaleString('es-MX'):''}" placeholder="0"
+        onfocus="monthFocus(this)"
+        onblur="monthBlur(this)"
+        oninput="updMonthTotal()">
+    </div>`;
+  }).join('');
+  updMonthTotal();
+}
+
+function monthFocus(el){
+  // Strip thousands separators so user can edit the raw number
+  const raw=el.value.replace(/,/g,'');
+  el.value=raw;
+  el.select();
+}
+
+function monthBlur(el){
+  const raw=el.value.trim().replace(/,/g,'');
+  // Accept numbers including negatives; ignore empty/lone minus/zero
+  const n=parseFloat(raw);
+  if(!isNaN(n) && n!==0){
+    el.value=n.toLocaleString('es-MX');
+    el.classList.add('has-val');
+  } else {
+    el.value='';
+    el.classList.remove('has-val');
+  }
+  updMonthTotal();
+}
+
+function updMonthTotal(){
+  let tot=0;
+  for(let i=0;i<12;i++){
+    const el=document.getElementById('mi-'+i);
+    if(el){
+      const raw=el.value.replace(/,/g,'').trim();
+      tot+=parseFloat(raw)||0;
+    }
+  }
+  const rub=document.getElementById('me-rub')?.value||'ingresos';
+  const imp=rub==='ingresos'?tot:-tot;
+  const el=document.getElementById('me-total');
+  if(el){
+    el.textContent='Total anual: '+(tot===0?'—':(tot>0?'+':'')+fmt(tot));
+    el.style.color=Math.abs(tot)<1?'var(--gray-m)':imp>0?'var(--pos)':'var(--neg)';
+  }
+}
+
+function getMonthValues(){
+  return Array.from({length:12},(_,i)=>{
+    const el=document.getElementById('mi-'+i);
+    if(!el) return 0;
+    const raw=el.value.replace(/,/g,'').trim();
+    const n=parseFloat(raw);
+    return isNaN(n)?0:n;
+  });
+}
+
+function fillAllMonths(){
+  const raw=document.getElementById('mt-fill-val').value.replace(/,/g,'');
+  const n=parseFloat(raw);
+  if(isNaN(n)){toast('Ingresa un monto válido','warn');return;}
+  for(let i=0;i<12;i++){
+    const el=document.getElementById('mi-'+i);
+    if(el){
+      el.value=n!==0?n.toLocaleString('es-MX'):'';
+      el.classList.toggle('has-val',n!==0);
+    }
+  }
+  updMonthTotal();
+}
+
+function clearAllMonths(){
+  for(let i=0;i<12;i++){
+    const el=document.getElementById('mi-'+i);
+    if(el){el.value='';el.classList.remove('has-val');}
+  }
+  updMonthTotal();
+}
+
+function openEffModal(gid,eid){
+  effGrpId=gid; editEffId=eid||null;
+  const g=groups.find(x=>x.id===gid);
+  const e=eid?g.effects.find(x=>x.id===eid):null;
+  document.getElementById('me-ttl').textContent=e?'Editar Efecto':'Nuevo Efecto';
+  document.getElementById('me-sub').textContent='Grupo: '+(g?g.nombre:'');
+  document.getElementById('me-nom').value=e?e.nombre:'';
+  document.getElementById('me-rub').value=e?e.rubro:'ingresos';
+  document.getElementById('mt-fill-val').value='';
+  buildMonthGrid(e?e.montos:new Array(12).fill(0));
+  updHint();
+  document.getElementById('me').classList.add('open');
+  setTimeout(()=>document.getElementById('me-nom').focus(),80);
+}
+function closeEffModal(){document.getElementById('me').classList.remove('open');}
+
+function saveEff(){
+  const nom=document.getElementById('me-nom').value.trim();
+  const rub=document.getElementById('me-rub').value;
+  const montos=getMonthValues();
+  if(!nom){toast('Ponle nombre al efecto','warn'); document.getElementById('me-nom').focus(); return;}
+  if(montos.every(v=>v===0)){toast('Ingresa al menos un monto','warn'); return;}
+  const g=groups.find(x=>x.id===effGrpId); if(!g){toast('Grupo no encontrado','warn'); return;}
+  if(editEffId){
+    const e=g.effects.find(x=>x.id===editEffId);
+    if(e){e.nombre=nom;e.rubro=rub;e.montos=montos;}
+    toast('Efecto actualizado','ok');
+  } else {
+    g.effects.push({id:uid(),nombre:nom,rubro:rub,montos,on:true});
+    toast('Efecto agregado ✓','ok');
+  }
+  closeEffModal(); save(); recalcular();
+}
+
+function setVista(v){
+  vista=v;
+  document.getElementById('vt-c').classList.toggle('on',v==='c');
+  document.getElementById('vt-d').classList.toggle('on',v==='d');
+  renderTable();
+}
+
+function recalcular(){renderGroups(); renderKPIs(); renderTable();}
+
+// ── SHAREPOINT CONFIG ─────────────────────────────────────────
+const PA_READ  = 'https://default2a21bd09a37a4ec48d88bb8f1dea12.d5.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/bd109e6ed5314fe6a485bfca72ccc8c6/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sAAV8RO3YLSNZwMaXyAGo5GgH0zuKUdSUDYJj7PCuYs';
+const PA_WRITE = 'https://default2a21bd09a37a4ec48d88bb8f1dea12.d5.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/888a681efb8646298214746ee4d5e7ed/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=6E0jzPS-DW-7wZmGyAiyEpElJSyiqA6POoZFTpvfaWA';
+const SP_ANIO  = '2026';
+
+// ── SP OVERLAY ────────────────────────────────────────────────
+function showOverlay(msg){
+  document.getElementById('sp-overlay-msg').textContent=msg||'Conectando con SharePoint…';
+  document.getElementById('sp-overlay').classList.add('show');
+}
+function hideOverlay(){ document.getElementById('sp-overlay').classList.remove('show'); }
+
+function setSpStatus(state, msg){
+  const el=document.getElementById('sp-status');
+  el.textContent=msg;
+  el.className='nav-sp-status '+(state||'');
+}
+
+// ── APLANAR grupos → array de filas para WRITE ────────────────
+function aplanarEfectos(){
+  const rows=[];
+  groups.forEach(g=>{
+    g.effects.forEach(e=>{
+      (e.montos||[]).forEach((monto,i)=>{
+        const n=parseFloat(monto)||0;
+        if(n!==0){
+          const mes=String(i+1).padStart(2,'0');
+          rows.push({
+            id:     e.id,
+            grupo:  g.nombre,
+            rubro:  e.rubro,
+            nombre: e.nombre,
+            mes:    SP_ANIO+'_'+mes,
+            monto:  n,
+            activo: e.on?true:false,
+            color:  g.colorId||0
+          });
+        }
+      });
+    });
+  });
+  return rows;
+}
+
+// ── RECONSTRUIR grupos desde filas de SP ──────────────────────
+function reconstruirGrupos(filas){
+  // filas: array de items de SP con Title, Periodo, Nombre de Grupo, Rubro, Efecto, Monto
+  const grpMap={};  // clave: nombre grupo
+
+  filas.forEach(f=>{
+    const nombreGrp = f['Nombre_de_Grupo'] || f['Nombre de Grupo'] || '';
+    const effId     = (f['Title']||'').split('_').slice(0,-2).join('_') || f['Title'];
+    const mesStr    = f['Periodo']||'';           // ej: 2026_04
+    const mesIdx    = parseInt((mesStr.split('_')[1]||'1'))-1;  // 0-based
+    const monto     = parseFloat(f['Monto'])||0;
+    const rubro     = f['Rubro']||'ingresos';
+    const nombre    = f['Efecto']||'';
+    const activo    = f['activo']!==false;
+    const color     = parseInt(f['color'])||0;
+
+    if(!nombreGrp) return;
+
+    if(!grpMap[nombreGrp]){
+      grpMap[nombreGrp]={
+        id:      uid(),
+        nombre:  nombreGrp,
+        colorId: color,
+        on:      true,
+        exp:     false,
+        effects: {}
+      };
+    }
+
+    const grp=grpMap[nombreGrp];
+    if(!grp.effects[effId]){
+      grp.effects[effId]={
+        id:     effId,
+        nombre: nombre,
+        rubro:  rubro,
+        montos: new Array(12).fill(0),
+        on:     activo
+      };
+    }
+    if(mesIdx>=0 && mesIdx<12){
+      grp.effects[effId].montos[mesIdx]=monto;
+    }
+  });
+
+  // Convertir maps a arrays
+  return Object.values(grpMap).map(g=>({
+    ...g,
+    effects: Object.values(g.effects)
+  }));
+}
+
+// ── SP READ ───────────────────────────────────────────────────
+async function spRead(){
+  showOverlay('Cargando desde SharePoint…');
+  const btn=document.getElementById('btn-read');
+  btn.disabled=true;
+  try{
+    const resp=await fetch(PA_READ,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({Periodo:SP_ANIO})
+    });
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const data=await resp.json();
+
+    // Reconstruir grupos desde efectos
+    const filas=data.efectos||[];
+    if(filas.length>0){
+      groups=reconstruirGrupos(filas);
+      _seq=Date.now(); // reset seq para evitar colisiones de id
+    }
+
+    // Guardar también en localStorage como caché
+    save();
+    setSpStatus('ok','● SharePoint');
+    toast('✓ Datos cargados desde SharePoint','ok');
+    recalcular();
+  } catch(err){
+    console.error('spRead error:',err);
+    setSpStatus('err','● Error SP');
+    toast('Error al cargar desde SharePoint: '+err.message,'');
+  } finally {
+    hideOverlay();
+    btn.disabled=false;
+  }
+}
+
+// ── SP WRITE ──────────────────────────────────────────────────
+async function spWrite(){
+  showOverlay('Guardando en SharePoint…');
+  const btn=document.getElementById('btn-write');
+  btn.disabled=true;
+  try{
+    const efectos=aplanarEfectos();
+    const resp=await fetch(PA_WRITE,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({Periodo:SP_ANIO, efectos})
+    });
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const data=await resp.json();
+
+    save(); // también guardar local
+    setSpStatus('ok','● SharePoint');
+    toast('✓ Guardado en SharePoint ('+efectos.length+' registros)','ok');
+  } catch(err){
+    console.error('spWrite error:',err);
+    setSpStatus('err','● Error SP');
+    toast('Error al guardar en SharePoint: '+err.message,'');
+  } finally {
+    hideOverlay();
+    btn.disabled=false;
+  }
+}
+
+// ── PERSISTENCIA LOCAL (caché) ────────────────────────────────
+const LSK='medistik_grp_v5';
+function save(){try{localStorage.setItem(LSK,JSON.stringify({groups,_seq}));}catch(e){}}
+function load(){try{const d=localStorage.getItem(LSK); if(d){const p=JSON.parse(d);groups=p.groups||[];_seq=p._seq||1;}}catch(e){}}
+
+// ── PDF ───────────────────────────────────────────────────────
+async function exportPDF(){
+  if(!window.jspdf){
+    toast('Cargando jsPDF…','');
+    await new Promise((ok,err)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';s.onload=ok;s.onerror=err;document.head.appendChild(s);});
+    if(!window.jspdf){toast('No se pudo cargar jsPDF','');return;}
+  }
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+  const W=297,H=210,M=10;
+  pdf.setFillColor(208,223,0); pdf.rect(0,0,W,12,'F');
+  pdf.setFont('helvetica','bold'); pdf.setFontSize(10); pdf.setTextColor(99,102,106);
+  pdf.text('TRAXION — Medistik · Modelo Financiero 2026',M,8);
+  pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
+  pdf.text('Generado: '+new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}),W-M,8,{align:'right'});
+
+  const {res,b}=calcModel();
+  let y=18;
+  const ga=groups.filter(g=>g.on&&g.effects.some(e=>e.on));
+  if(ga.length>0){
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(8); pdf.setTextColor(123,63,196);
+    pdf.text('GRUPOS ACTIVOS:',M,y); y+=5;
+    ga.forEach(g=>{
+      pdf.setFont('helvetica','bold'); pdf.setFontSize(7.5); pdf.setTextColor(99,102,106);
+      pdf.text('▸ '+g.nombre+'  →  Δ EBITDA: '+sgn(grpImpact(g)),M+3,y); y+=4;
+      g.effects.filter(e=>e.on).forEach(e=>{
+        pdf.setFont('helvetica','normal'); pdf.setFontSize(7); pdf.setTextColor(150,150,148);
+        const tot=sum((e.montos||[]).map(v=>parseFloat(v)||0));
+        pdf.text('    • '+e.nombre+' — '+RLBL[e.rubro]+', total anual: '+(tot>=0?'+':'')+fmt(tot),M+4,y); y+=3.5;
+      }); y+=1;
+    }); y+=2;
+  }
+
+  const bEb=sum(b.ebitda), nEb=sum(res.ebitda);
+  const nEbOp=sum(res.ebitda_op), nIng=sum(res.ingresos);
+  const kpis=[
+    {l:'INGRESOS 2026',  v:fmtM(nIng)},
+    {l:'EBITDA 2026',    v:fmtM(nEb)+' ('+fmtPct(nEb,nIng)+')'},
+    {l:'EBITDA OPERATIVO',v:fmtM(nEbOp)+' ('+fmtPct(nEbOp,nIng)+')'},
+    {l:'Δ EBITDA',       v:sgnM(nEb-bEb)},
+  ];
+  const kw=(W-M*2-9)/4;
+  kpis.forEach((k,i)=>{
+    const kx=M+i*(kw+3);
+    pdf.setFillColor(249,251,212); pdf.setDrawColor(181,189,0); pdf.setLineWidth(.3);
+    pdf.roundedRect(kx,y,kw,12,1,1,'FD');
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(6.5); pdf.setTextColor(150,150,148); pdf.text(k.l,kx+3,y+4);
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(11); pdf.setTextColor(143,143,0); pdf.text(k.v,kx+3,y+10);
+  });
+  y+=17;
+
+  const trows=[
+    {l:'Ingresos',              ba:sum(BASE.ingresos),       nw:sum(res.ingresos)},
+    {l:'Costos Variables',      ba:sum(BASE.costos_var),     nw:sum(res.costos_var)},
+    {l:'Contrib. Marginal',     ba:sum(b.cm),                nw:sum(res.cm),  bo:true},
+    {l:'  % ventas',            ba:sum(b.cm)/sum(BASE.ingresos)*100, nw:sum(res.cm)/sum(res.ingresos)*100, pct:true},
+    {l:'Costos Fijos',          ba:sum(BASE.costos_fijos),   nw:sum(res.costos_fijos)},
+    {l:'Gastos Generales',      ba:sum(BASE.gastos_grales),  nw:sum(res.gastos_grales)},
+    {l:'Total Costos',          ba:sum(b.tc),                nw:sum(res.tc),  bo:true},
+    {l:'EBITDA',                ba:bEb,                      nw:nEb,          bo:true,eb:true},
+    {l:'  % ventas EBITDA',     ba:bEb/sum(BASE.ingresos)*100, nw:nEb/nIng*100, pct:true},
+    {l:'Otros (ing.) gastos',   ba:sum(OTROS_BASE),          nw:sum(OTROS_BASE), otros:true},
+    {l:'EBITDA Operativo',      ba:sum(b.ebitda_op),         nw:nEbOp,        bo:true,ebop:true},
+    {l:'  % ventas EBITDA Op',  ba:sum(b.ebitda_op)/sum(BASE.ingresos)*100, nw:nEbOp/nIng*100, pct:true},
+  ];
+  const cw=[65,38,38,38]; const rh=6.5;
+  pdf.setFillColor(99,102,106); pdf.rect(M,y,179,rh,'F');
+  ['Rubro','Ppto Original','Δ Ajuste','Nuevo Ppto'].forEach((c,i)=>{
+    const cx=M+cw.slice(0,i).reduce((a,b2)=>a+b2,0);
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(7); pdf.setTextColor(255,255,255);
+    pdf.text(c,cx+(i===0?2:cw[i]-2),y+4.5,{align:i===0?'left':'right'});
+  }); y+=rh;
+
+  trows.forEach((row,ri)=>{
+    const d=row.pct?row.nw-row.ba:row.nw-row.ba;
+    if(row.eb) pdf.setFillColor(26,53,80);
+    else if(row.ebop) pdf.setFillColor(13,34,53);
+    else if(row.otros) pdf.setFillColor(243,238,255);
+    else if(row.pct) pdf.setFillColor(249,251,212);
+    else if(row.bo) pdf.setFillColor(235,245,250);
+    else pdf.setFillColor(ri%2===0?250:255,ri%2===0?250:255,ri%2===0?250:255);
+    pdf.rect(M,y,179,rh,'F');
+    const tc=row.eb?[255,255,255]:row.ebop?[227,233,53]:row.pct?[143,143,0]:[99,102,106];
+    pdf.setTextColor(tc[0],tc[1],tc[2]);
+    pdf.setFont('helvetica',row.bo?'bold':'normal'); pdf.setFontSize(row.pct?7:8);
+    pdf.text(row.l,M+2,y+4.5);
+    if(row.pct){
+      pdf.text(row.ba.toFixed(1)+'%',M+cw[0]+cw[1]-2,y+4.5,{align:'right'});
+      pdf.text('—',M+cw[0]+cw[1]+cw[2]-2,y+4.5,{align:'right'});
+      pdf.text(row.nw.toFixed(1)+'%',M+179-2,y+4.5,{align:'right'});
+    } else {
+      pdf.text(fmt(row.ba),M+cw[0]+cw[1]-2,y+4.5,{align:'right'});
+      const delta=d;
+      const dc=delta>0?[42,138,26]:[181,59,42];
+      pdf.setTextColor(Math.abs(delta)<1?180:dc[0],Math.abs(delta)<1?180:dc[1],Math.abs(delta)<1?178:dc[2]);
+      pdf.text(Math.abs(delta)<1?'—':(delta>0?'+':'')+fmt(delta),M+cw[0]+cw[1]+cw[2]-2,y+4.5,{align:'right'});
+      if(row.eb) pdf.setTextColor(208,223,0);
+      else if(row.ebop) pdf.setTextColor(227,233,53);
+      else pdf.setTextColor(row.bo?24:99,row.bo?90:102,row.bo?130:106);
+      pdf.setFont('helvetica','bold');
+      pdf.text(fmt(row.nw),M+179-2,y+4.5,{align:'right'});
+    }
+    y+=rh;
+  });
+
+  pdf.setFont('helvetica','normal'); pdf.setFontSize(7); pdf.setTextColor(171,171,170);
+  pdf.text('Medistik · Traxion Logística y Tecnología · Confidencial',W/2,H-4,{align:'center'});
+  pdf.save('Medistik_Modelo_2026_'+new Date().toISOString().slice(0,10)+'.pdf');
+  toast('✓ PDF descargado','ok');
+}
+
+function toast(msg,type){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast '+(type||''); el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+load();
+recalcular();
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeGrpModal();closeEffModal();}
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){
+    if(document.getElementById('mg').classList.contains('open')) saveGrp();
+    if(document.getElementById('me').classList.contains('open')) saveEff();
+  }
+});
+</script>
+</body>
+</html>
